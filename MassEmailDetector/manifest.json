@@ -2,45 +2,30 @@
   "name": "Mass Email Detector",
   "version": "0.0.1",
   "manifest_version": 2,
-  "description": "A tool that informs the user how many other people have received that email. Developed as part of a Trinity College module by Stephen Byrne, Diarmuid Tully, Sean Cheetham, Luke Feely and Evan",
+  "description": "A tool that informs the user how many other people have received a similar email.",
   "homepage_url": "https://www.tcd.ie/",
-  "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
-  },
   "default_locale": "en",
-  "background": {
-    "page": "src/bg/background.html",
-    "persistent": true
-  },
   "options_page": "src/options_custom/index.html",
-  "browser_action": {
-    "default_icon": "icons/icon19.png",
-    "default_title": "browser action demo",
+  "page_action": {
+    "default_title": "Mass-email Detector",
     "default_popup": "src/browser_action/browser_action.html"
   },
   "permissions": [
-    "contentSettings",
-    "notifications",
-    "https://mail.google.com/mail/*"
+    "storage",
+    "declarativeContent"
   ],
   "content_scripts": [
     {
-      "matches": [
-        "https://www.google.com/*"
-      ],
-      "css": [
-        "src/inject/inject.css"
-      ]
-    },
-    {
-      "matches": [
-        "https://www.google.com/*"
-      ],
-      "js": [
-        "src/inject/inject.js"
-      ]
+        "matches": [
+            "<all_urls>"
+        ],
+        "js": [
+            "src/browser_action/browser_action.js"
+        ]
     }
-  ]
+  ],
+  "background": {
+    "scripts": ["src/background.js"],
+    "persistent": false
+  }
 }
