@@ -1,8 +1,6 @@
-//Browser actions JS - "Popup"
+console.log("running browser_action.js");
 
-//vars
-var active;
-
+//none of below work. -> why?
 document.addEventListener("DOMContentLoaded", function() {
     restore_options();
     console.log("options restored");
