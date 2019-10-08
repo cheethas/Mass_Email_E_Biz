@@ -1,5 +1,9 @@
 import hashlib
 import re
+import requests
+import json
+
+API_URL = "http://127.0.0.1:8000"
 
 #get user input from console
 def getUserInput():
@@ -36,9 +40,103 @@ def removeNouns(textFile: str):
 
     return returnString
 
+#works
+def doesHashExist(hashString: str):
+    try:
+        hashReq = requests.get(API_URL + "/api/hashes/" + hashString)
+        #if not found returned
+        if (hashReq.status_code == 404):
+            print("Bad request 404 received")
+            return False
+
+        returnedJson = hashReq.json()
+        returnedHashString = returnedJson["hashValue"]
+
+        #return true if the returned string and passed in string are equal to eachother
+        return (returnedHashString == hashString)
+        
+    except:
+        return False
+    
+#works
+def addHashToDB(hashString: str):
+    try:
+        jsonObj = {"hashValue": hashString}
+        print(jsonObj)
+        hashReq = requests.post(API_URL + "/api/hashes/", data=jsonObj)
+
+        if (hashReq.status_code == 201):
+            return True
+        else:
+            print("Adding new hash failed")
+            print(hashReq.status_code)
+            return False
+    except:
+        print("Adding new hash failed")
+        return False
+
+#updates the count for a string
+def updateHashCount(hashString: str):
+    try:
+        hashReq = requests.get(API_URL + "/api/hashes/" + hashString)
+        #if not found returned
+        if (hashReq.status_code == 404):
+            print("Bad request 404 received")
+            return False
+
+        returnedJson = hashReq.json()
+        returnedHashString = returnedJson["hashValue"]
+        #if the returned JSON already exists, add the count then update the counter in the db
+
+        if (returnedHashString == hashString):
+            print("Strings matched")
+            #NOTE GETS TO HERE
+            
+            returnedCounter = returnedJson["count"]
+            newCounter = returnedCounter+1
+
+            #create the updated object
+            jsonObj = {"hashValue": hashString, "count": newCounter}
+            #update the server
+            
+            hashReq = requests.put(API_URL + "/api/hashes/" + hashString + "/", data=jsonObj)
+            if (hashReq.status_code==200):
+                #hash count updated successfully
+                print("Hash count updated successfully")
+                return True
+            else:
+                print("Update failed")
+                return False
+        else:
+            print("Update failed")
+            return False
+    except:
+        return False
+            
+      
+
 #mainline
 if __name__ == "__main__":
     
+    #update a hash count in a db
+    print(updateHashCount("test"))
+
+    """
+    #test adding a new hash to the api
+    print(addHashToDB("test"))
+    """
+
+    """
+    #for checking if a hash exists in the db
+    #unsuccessful request
+    print(doesHashExist("dsajdh"))
+    print("")
+    #successful request
+    print(doesHashExist("agdhsjadyeuuw7823"))
+    """
+
+    #testing hashing algorithm
+    """
     email1 = getFileText("email1.txt")
     email2 = getFileText("email2.txt")
 
@@ -48,6 +146,7 @@ if __name__ == "__main__":
     print(email1hash == email2hash)
     print(email1hash)
     print(email2hash)
+    """
 
 
     
