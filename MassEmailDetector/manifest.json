@@ -3,29 +3,16 @@
   "version": "0.0.1",
   "manifest_version": 2,
   "description": "A tool that informs the user how many other people have received a similar email.",
-  "homepage_url": "https://www.tcd.ie/",
   "default_locale": "en",
-  "options_page": "src/options_custom/index.html",
-  "page_action": {
+
+  "browser_action": {
     "default_title": "Mass-email Detector",
-    "default_popup": "src/browser_action/browser_action.html"
+    "default_popup": "src/popup/popup.html"
   },
   "permissions": [
-    "storage",
-    "declarativeContent"
-  ],
-  "content_scripts": [
-    {
-        "matches": [
-            "<all_urls>"
-        ],
-        "js": [
-            "src/browser_action/browser_action.js"
-        ]
-    }
+    "activeTab"
   ],
   "background": {
-    "scripts": ["src/background.js"],
-    "persistent": false
+    "scripts": ["src/background.js"]
   }
 }
