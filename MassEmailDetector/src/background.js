@@ -1,10 +1,12 @@
-
+//TO do
+//  Save data to chrome, don't just persist across background
+//
+//
 var background = {
 
   stateOfCheckBox: {},
 
   init: function(){
-
     //listener for messages and route to functions
     chrome.runtime.onMessage.addListener(function(request,sender,sendresponse){
       if(request.fn in background){
