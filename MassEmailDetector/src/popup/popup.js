@@ -1,16 +1,22 @@
 //document.addEventListener('click', () => alert('click'));
 
 var console = chrome.extension.getBackgroundPage().console;
-console.log("content script popup running");
 
 var app = {
+
   init: function(){
-    //cache some element refs
+
+    //cache some element refS
     var stateOfCheckBox = document.getElementById("onOff");
 
-    onOff.addEventListener("click",function(){
-      chrome.runtime.sendMessage(stateOfCheckBox.checked);
-    })
+    //get state of checkbox  when loading
+    chrome.runtime.sendMessage({fn: "getStateOfCheckBox"}, function(response){
+      stateOfCheckBox.checked = response;
+    });
+
+    stateOfCheckBox.addEventListener("click",function(){
+      chrome.runtime.sendMessage({fn: "setStateOfCheckBox" ,stateOfCheckBox: stateOfCheckBox.checked});
+    });
   }
 };
 
