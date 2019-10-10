@@ -5,19 +5,20 @@ import json
 
 API_URL = "http://127.0.0.1:8000"
 
-#get user input from console
-def getUserInput():
-    return input("Enter a string to hash")
+"""
 
+
+REWRITE THESE IN JS
+
+
+"""
+
+
+#all private methods below here
 #hash the passed in text returning a hexdigest of md5
 def hashText(passedText):
     hashObject = hashlib.md5(passedText.encode('utf-8')).hexdigest()
     return hashObject
-
-#open the file in read mode
-def getFileText(filename):
-    fileObj = open(filename, "r")
-    return fileObj.read()
 
 #remove all whitespce from the document
 def removeWhiteSpace(textFile: str):
@@ -37,8 +38,28 @@ def removeNouns(textFile: str):
         #length = x.length
         returnString = returnString.replace(x, '')
 
-
     return returnString
+
+
+
+"""
+
+
+DONT WORRY ABOUT BELOW HERE
+
+
+"""
+
+
+#open the file in read mode
+def getFileText(filename):
+    fileObj = open(filename, "r")
+    return fileObj.read()
+
+#get user input from console
+def getUserInput():
+    return input("Enter a string to hash")
+
 
 #works
 def doesHashExist(hashString: str):
@@ -89,9 +110,6 @@ def updateHashCount(hashString: str):
         #if the returned JSON already exists, add the count then update the counter in the db
 
         if (returnedHashString == hashString):
-            print("Strings matched")
-            #NOTE GETS TO HERE
-            
             returnedCounter = returnedJson["count"]
             newCounter = returnedCounter+1
 
@@ -113,27 +131,92 @@ def updateHashCount(hashString: str):
     except:
         return False
             
-      
+
+def getHashCount(hashString: str):
+    try:
+        hashReq = requests.get(API_URL + "/api/hashes/" + hashString)
+        #if not found returned
+        if (hashReq.status_code == 404):
+            print("Bad request 404 received")
+            return -1
+
+        returnedJson = hashReq.json()
+        returnedHashString = returnedJson["hashValue"]
+
+        #return true if the returned string and passed in string are equal to eachother
+        if (returnedHashString == hashString):
+            return returnedJson["count"]
+    
+    except:
+        return -1
+
+
+
+#method to be called from JS
+def processEmail(emailBody: str):
+    """
+    add or update email hash
+    """
+    #get the hash value from the body of the email
+    hashValue = hashText(removeWhiteSpace(removeNouns(emailBody)))
+
+    """
+    redesign server
+    /api/process/<hashstr>
+    /api/retreive/<hashstr>
+    """
+
+    #if the email hash exists already on the database then increment the count
+    #if the email hash does not exist then create a new record for the DB
+    try:
+        if (doesHashExist(hashString=hashValue)):
+            return updateHashCount(hashString=hashValue)
+        else:
+            return addHashToDB(hashString=hashValue)
+    except:
+        print("An error occured")
+        return False
+
+#method to be called from js
+def retreiveEmailDetails(emailBody: str):
+    """
+    return: number of times hash has been processed
+    """
+    #get the hash value from the body of the email
+    hashValue = hashText(removeWhiteSpace(removeNouns(emailBody)))
+
+    #search the database for an email string, if it does not exist return -1, if it does return the number of times it occurs
+    try:
+        return getHashCount(hashString=hashValue)
+    except:
+        return -1
+
+    
 
 #mainline
 if __name__ == "__main__":
-    
+    """
+    #get the number of times a specific thing occurs
+    print(getHashCount("Stephen like COCK"))
+    """
+    """
     #update a hash count in a db
-    print(updateHashCount("test"))
+    print(updateHashCount("Stephen like COCK"))
+    """
 
     """
     #test adding a new hash to the api
-    print(addHashToDB("test"))
+    print(addHashToDB("Stephen like COCK"))
     """
 
-    """
+    
     #for checking if a hash exists in the db
     #unsuccessful request
-    print(doesHashExist("dsajdh"))
-    print("")
+    #print(doesHashExist("dsajdh"))
+    #print("")
     #successful request
-    print(doesHashExist("agdhsjadyeuuw7823"))
-    """
+    #print(doesHashExist("agdhsjadyeuuw7823"))
+    
 
     #testing hashing algorithm
     """
@@ -153,12 +236,3 @@ if __name__ == "__main__":
 
 #FURTHER ADVANCEMENT
 #FIND A WAY FOR IT TO ALLOW NAMES AT THE START OF SENTENCES
-
-
-
-#CODE TO FIND THE WORDS IN A PHRASE THAT ARE CAPITAL LETTERS AT THE START OF A SENTENCE
-#import re
-#mystr="This is a Test sentence. The sentence is Supposed to Ignore the Words at the beginning of the Sentence."
-##
-#print(re.findall(r'(?<!^)(?<!\. )[A-Z][a-z]+',mystr))
-#
