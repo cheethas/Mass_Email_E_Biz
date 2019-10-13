@@ -1,6 +1,6 @@
 const MASS_EMAIL_CUTOFF = 10; //if been hashed > 10 times; likely a mass email
 var currentEmail;
-
+document.addEventListener('click', () => alert('click'));
 /*
     NOTES
       -Remaking some of seans stuff,
@@ -51,7 +51,14 @@ function getNumberOfHashes(String api_address, String hash){
   };
 }
 
+function isEmail(String currentURL){
+  //check if it is extension of standard gmail URL
+  //if length > standard url.length = is email
+}
 
-//function that alerts user to start
+//function that alerts user of mass emailBody
+
+//function that listens for DOM Loaded && isEmail and runs above functions
+
 
 //progress to injects icon

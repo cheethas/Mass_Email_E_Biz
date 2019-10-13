@@ -12,6 +12,12 @@
   "permissions": [
     "activeTab"
   ],
+  "content_scripts": [
+   {
+     "matches": ["https://mail.google.com/mail/u/0/#inbox/*"],
+     "js": ["content scripts/content.js"]
+   }
+ ],
   "background": {
     "scripts": ["src/background.js"]
   }
