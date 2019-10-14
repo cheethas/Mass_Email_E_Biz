@@ -1,7 +1,7 @@
 //TO do
 //  Save data to chrome, don't just persist across background
 //
-//
+console.log("Background running");
 var background = {
 
   stateOfCheckBox: {},
@@ -26,5 +26,4 @@ var background = {
 
 }
 
-//startup
 background.init();

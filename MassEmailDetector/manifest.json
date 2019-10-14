@@ -13,11 +13,14 @@
     "activeTab"
   ],
   "content_scripts": [
-   {
-     "matches": ["https://mail.google.com/mail/u/0/#inbox/*"],
-     "js": ["content scripts/content.js"]
-   }
- ],
+       {
+       "matches": [
+           "https://mail.google.com/mail/u/0/#inbox/*"
+           ],
+       "js": ["content scripts/content.js"],
+       "run_at": "document_end"         // pay attention to this line
+       }
+   ],
   "background": {
     "scripts": ["src/background.js"]
   }

@@ -1,6 +1,7 @@
 const MASS_EMAIL_CUTOFF = 10; //if been hashed > 10 times; likely a mass email
 var currentEmail;
-document.addEventListener('click', () => alert('click'));
+console.log("running");
+document.addEventListener('click', () => alert('click'));//test if working at all
 /*
     NOTES
       -Remaking some of seans stuff,
@@ -12,6 +13,8 @@ document.addEventListener('click', () => alert('click'));
       -Need to find way to display a sign when hovering email -> could use alert() if too hard.
       -
 */
+
+
 
 //function that returns body of email as a string
 function String getBodyOfEmail(someInput){
