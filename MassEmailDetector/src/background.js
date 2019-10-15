@@ -2,9 +2,12 @@
 //  Save data to chrome, don't just persist across background
 //
 console.log("Background running");
+
 var background = {
 
-  stateOfCheckBox: {},
+  sender: {},
+  body:{},
+  url: "seansDB",
 
   init: function(){
     //listener for messages and route to functions
@@ -12,18 +15,51 @@ var background = {
       if(request.fn in background){
         background[request.fn](request,sender,sendresponse);
       }
+      //console.log(sender);
     });
   },
 
-  setStateOfCheckBox: function(request,sender,sendResponse){
-    console.log("setting state", request.stateOfCheckBox);
-    this.stateOfCheckBox = request.stateOfCheckBox;
+  setSender: function(request,sender,sendResponse){
+    console.log("sender:", request.sender);
+    this.sender = request.sender;
   },
 
-  getStateOfCheckBox: function(request,sender,sendResponse){
-    sendResponse(this.stateOfCheckBox);
+  setBody: function(request,sender,sendResponse){
+    console.log("body:", request.sender);
+    this.body = request.sender;
+
+
+  },
+
+  calcData: function(request,sender,sendResponse){
+    var peopleWhoGotEmail = 10;
+    console.log("people who got email: " + peopleWhoGotEmail);
+  },
+
+  mainF: function mainF(){
+    var joinEmailAndBody = this.sender + this.body;
+    var joinedStringWihoutNouns = removeNouns(joinEmailAndBody);
+    var noNounsOrWhiteSpace = removeWhiteSpace(joinedStringWihoutNouns);
+    var hash = hashFunction(stringToHash);
+    var urlPlusHash = this.url + "/" + hash;
+
+    //get number of hashes using hash from server
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open("GET",urlPlusHash,false);
+    xmlHttp.send(null);
+    var response = xmlHttp.responseText; //could send this +1 back to user
+    
+    //add 1 to number and hash and post
+
+    //send message to content script to alert
   }
 
 }
-
 background.init();
+
+function hashFunction(stringToHash){
+  //SEANS HASH function
+
+  var result = "HFGD6353BDNND";
+  return result;
+}
