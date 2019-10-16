@@ -25,6 +25,20 @@ submit_btn.addEventListener("click",function(){
   chrome.runtime.sendMessage({fn: "setBody", sender:ebody.value}, function(response){
       console.log("body sending to background");
   });
+
+  //make a call to the mainF function to process email body and add to database
+  chrome.runtime.sendMessage(
+    {
+      fn: "mainF",
+      sender: ebody.value
+    },
+    function(response){
+      alert("number of people who have received mail:" + response.sendResponse);
+    }
+  );
+
+
+
 //  chrome.runtime.sendMessage({fn: "calcData"}, function(response){
 //    alert("Number of people who recieved email: " + response.sendResponse);
 //  });
