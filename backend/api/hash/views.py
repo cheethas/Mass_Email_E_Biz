@@ -50,7 +50,8 @@ class HashesDetailView(generics.RetrieveUpdateDestroyAPIView):
                 data={
                     "message": "Hash with value: {} does not exist".format(kwargs["pk"])
                 },
-                status=status.HTTP_404_NOT_FOUND
+                #had to change to no content as 404 messed up js
+                status=status.HTTP_204_NO_CONTENT
             )
 
     #@validate_request_data
