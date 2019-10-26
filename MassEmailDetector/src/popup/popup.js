@@ -32,7 +32,12 @@ submit_btn.addEventListener("click",function(){
       fn: "mainF",
       sender: ebody.value
     },
+
+
+
+
     function(response){
+      
       alert("number of people who have received mail:" + response.sendResponse);
     }
   );
