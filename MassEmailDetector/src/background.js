@@ -138,10 +138,9 @@ function createNewHash(hashString){
   //add to the database
   xhr.onreadystatechange = function() {
     if (xhr.readyState == 4 && xhr.status == 201){
-      var response = xhr.responseText;
-      var responseJson = JSON.response;
-      console.log("hashVal = " + responseJson.hashValue.toString() + "count = " + responseJson.count.toString());
-
+      
+      //perorm a gt req to check data is successfully in db
+      performJustGetReq(hashString.toString());
       
       return true;
     }
@@ -201,7 +200,7 @@ function performJustGetReq(hashString){
       var response = xhr.responseText;
       var responseJson = JSON.parse(response);
 
-      console.log("hashVal = " + responseJson.hashValue + "count = " + responseJson.count);
+      console.log("hashVal = " + responseJson.hashValue + " count = " + responseJson.count);
     }
   }
   xhr.onerror = function() {
