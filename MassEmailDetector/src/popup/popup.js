@@ -27,9 +27,20 @@ submit_btn.addEventListener("click",function(){
   });
 
   //make a call to the mainF function to process email body and add to database
-  chrome.runtime.sendMessage({fn: "mainF",sender: ebody.value},function(response){
-      alert("number of people who have received mail:" + response.result);
-    });
+  chrome.runtime.sendMessage(
+    {
+      fn: "mainF",
+      sender: ebody.value
+    },
+
+
+
+
+    function(response){
+
+      alert("number of people who have received mail:" + response.sendResponse);
+    }
+  );
 
 
 });

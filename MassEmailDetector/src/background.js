@@ -39,35 +39,25 @@ var background = {
   },
 
   mainF: function mainF(request, sender, sendResponse){
-    // var joinEmailAndBody = (this.emailSender + this.emailBody).toString();
-    // var joinedStringWihoutNouns = removeNouns(joinEmailAndBody);
-    // var noNounsOrWhiteSpace = removeWhiteSpace(joinedStringWihoutNouns.toString());
-    //
-    // //to display the altered string
-    // console.log(joinEmailAndBody);
-    // console.log(noNounsOrWhiteSpace);
-    //
-    // var hash = MD5(noNounsOrWhiteSpace);
-    // console.log(hash);
-    //
-    // //console.log(doesHashExist("agdhsjadyeuuw7823"));
-    //
-    // //check if the hash exists
-    // var hashExists = createHash(hash);
-    // console.log(hashExists);
-    var numberHashes = 10;
-    sendResponse({ result: numberHashes });
-    return true;
-    /*
-    if (!hashExists){
-      //create a new hash
-      console.log("BEgins to create a new hash");
-      var hashCreated = createNewHash(hash);
-      console.log(hashCreated);
-    }
-    */
+    var joinEmailAndBody = (this.emailSender + this.emailBody).toString();
+    var joinedStringWihoutNouns = removeNouns(joinEmailAndBody);
+    var noNounsOrWhiteSpace = removeWhiteSpace(joinedStringWihoutNouns.toString());
 
+    //to display the altered string
+    console.log(joinEmailAndBody);
+    console.log(noNounsOrWhiteSpace);
 
+    var hash = MD5(noNounsOrWhiteSpace);
+    console.log(hash);
+
+    //console.log(doesHashExist("agdhsjadyeuuw7823"));
+
+    //check if the hash exists
+    numberOfHashes = 10;
+    handleHash(hash);
+
+    sendResponse({ result: numberOfHashes});
+    return true
 
   }
 }
@@ -88,7 +78,7 @@ function removeWhiteSpace(textString){
 }
 
 //performs a get request to the server for the specific hash
-function createHash(hashString){
+function handleHash(hashString){
   var found = false;
   var hashUrl =  "http://127.0.0.1:8000/api/hashes/" + hashString + "/";
 
@@ -101,7 +91,11 @@ function createHash(hashString){
     if (xhr.readyState == 4 && xhr.status == 200){
       var response = xhr.responseText; //could send this +1 back to user
       var returnJson = JSON.parse(response);
+
       console.log("hash = " + returnJson.hashValue.toString() + " count = " + returnJson.count.toString());
+
+      //return the count as the return variable
+      response = returnJson.count.toString();
 
       //make this so that a pop up shows up
       // and so it updates the count
@@ -144,9 +138,10 @@ function createNewHash(hashString){
   //add to the database
   xhr.onreadystatechange = function() {
     if (xhr.readyState == 4 && xhr.status == 201){
-      var response = xhr.responseText;
-      var responseJson = JSON.response;
-      console.log("hashVal = " + responseJson.hashValue + "count = " + json.count);
+
+      //perorm a gt req to check data is successfully in db
+      performJustGetReq(hashString.toString());
+
       return true;
     }
   }
@@ -159,7 +154,6 @@ function createNewHash(hashString){
 //send a post request to the server to add a new hash string
 function updateHash(jsonObj){
 
-  console.log("passed in : " + jsonObj);
 
   var xhr = new XMLHttpRequest();
   var url = "http://127.0.0.1:8000/api/hashes/" + jsonObj.hashValue + "/";
@@ -173,17 +167,46 @@ function updateHash(jsonObj){
   xhr.send(updatedObj);
   //add to the database
   xhr.onreadystatechange = function() {
-    if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 204)){
+    if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 204 )){
       var response = xhr.responseText;
-      var responseJson = JSON.response;
       console.log("updated successfully");
-      console.log("hashVal = " + responseJson.hashValue + "count = " + json.count);
+      var responseJson = JSON.parse(response);
+
+      console.log("hashVal = " + responseJson.hashValue + "count = " + responseJson.count);
+
+
+      //performJustGetReq(jsonObj.hashValue);
+
       return true;
     }
   }
   xhr.onerror = function(){console.log("client 2 had an error"); console.log(xhr.status); return false;}
 
   return false;
+
+}
+
+
+function performJustGetReq(hashString){
+
+  var xhr = new XMLHttpRequest();
+  var url = "http://127.0.0.1:8000/api/hashes/" + hashString + "/";
+  //open connection
+  xhr.open("GET", url, true);
+  xhr.send(null);
+
+  xhr.onreadystatechange = function(){
+    if (xhr.readyState == 4 && (xhr.status == 200)){
+      var response = xhr.responseText;
+      var responseJson = JSON.parse(response);
+
+      console.log("hashVal = " + responseJson.hashValue + " count = " + responseJson.count);
+    }
+  }
+  xhr.onerror = function() {
+    console.log("request failed " + xhr.status);
+  }
+
 
 }
 
