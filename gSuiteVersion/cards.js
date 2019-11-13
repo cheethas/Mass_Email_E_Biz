@@ -1,4 +1,36 @@
+//import 'google-apps-script';
 //TEMPLATE FILE NEEDS TO BE ADAPTED FOR MASS EMAIL, STARTED BELOW EXPENSE EXAMPLE
+
+
+
+/*
+//The parent object for the card being made
+function createMassEmailCard(numOtherUsersGotEmail,result) {
+  var card = CardService.newCardBuilder();
+  card.setHeader(CardService.newCardHeader().setTitle('Mass Email Detector!'));
+  card.addSection(createMessageSection(numOtherUsersGotEmail, result));
+  return card;
+}
+*/
+
+function createMassEmailCard(numOtherUsersGotEmail, result){
+  return CardService
+  .newCardBuilder()
+  .setHeader(
+      CardService.newCardHeader()
+          .setTitle('Mass Email Detector!')
+          .setSubtitle('Find out how many people have recieved' +
+                       'this email:'))
+  .addSection(
+       CardService.newCardSection()
+           .setHeader('This email '+ (result ? 'is' : 'is not') + ' a mass email!')  // optional
+           .addWidget(CardService.newTextParagraph().setText(
+                numOtherUsersGotEmail
+               )
+  ))
+  .build();
+}
+
 
 
 var FIELDNAMES = ['Date', 'Amount', 'Description', 'Spreadsheet URL'];
@@ -33,14 +65,6 @@ function createExpensesCard(opt_prefills, opt_status) {
   
   return card;
 }
-
-function createMassEmailCard(numOtherUsersGotEmail,result) {
-  var card = CardService.newCardBuilder();
-  card.setHeader(CardService.newCardHeader().setTitle('Mass Email Detector!'));
-  card.addSection(section)
-  return card;
-}
-
 
 
 /**

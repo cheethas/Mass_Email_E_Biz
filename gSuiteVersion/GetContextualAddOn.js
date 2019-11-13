@@ -1,4 +1,4 @@
-
+//import 'google-apps-script';
 
 /**
  * Returns the contextual add-on data that should be rendered for
@@ -20,7 +20,7 @@ function getContextualAddOn(event) {
   
   var card = createMassEmailCard(numOtherUsersGotEmail,result);
 
-  return [card.build()];
+  return card;
 }
 
 /**
