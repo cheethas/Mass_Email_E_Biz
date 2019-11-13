@@ -8,17 +8,25 @@
  * @param {Object} event Event containing the message ID and other context.
  * @returns {Card[]}
  */
-function getContextualAddOn(event) {
-  var message = getCurrentMessage(event);
+function getContextualAddOn(e) {
   
-  //var emailBody = getRecievedData(message);
+  var accessToken = e.messageMetadata.accessToken;
+  GmailApp.setCurrentMessageAccessToken(accessToken);
+  
+  var messageId = e.messageMetadata.messageId;
+  var message = GmailApp.getMessageById(messageId);
+  var emailBody = message.getPlainBody();
+  
+  emailBody = MD5(removeWhiteSpace(removeNouns(emailBody)));
+  
+  
   //check if mass email -> helpers as before
   
   //give a string to builder to display yes / no
   var numOtherUsersGotEmail = "10";
   var result = "yes";
   
-  var card = createMassEmailCard(numOtherUsersGotEmail,result);
+  var card = createMassEmailCard(emailBody,result);
 
   return card;
 }
