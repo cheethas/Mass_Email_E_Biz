@@ -1,5 +1,4 @@
 //import 'google-apps-script';
-
 //functions to deal with manipulation of email text
 function removeNouns(emailBody){
   //declare regex
@@ -12,6 +11,47 @@ function removeNouns(emailBody){
 function removeWhiteSpace(textString){
   return textString.replace(/ /g, "");
 }
+
+
+//perform refactoring
+function newHandleHash(hashVal){
+
+}
+
+//for if a hash is present
+function checkHashPresent(hashVal){
+  //rememeber to change to passed in value
+  var getURL = "http://127.0.0.1:8000/api/hashes/";
+
+  //perfom get req
+  var options = {
+    "muteHttpExceptions" : false,
+    "headers": {
+      'Request_Method' : 'GET',
+   },
+  };
+  Logger.log(getURL);
+  try{
+    var response = UrlFetchApp.fetch(getURL);//,options);
+    var rCode = response.getResponseCode();
+    
+    if ((rCode == 200) || (rCode ==204)){
+        //interpret get req
+        Logger.log(response.getResponseCode());
+        var responseJson = response.getContentText();
+        Logger.log(responseJson);
+        return true;
+    } else {
+      return flase;
+    }
+  } catch (e) {
+    Logger.log("went to catch");
+    return false;
+  }
+}
+
+
+
 
 //performs a get request to the response = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
 

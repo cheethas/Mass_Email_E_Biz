@@ -17,16 +17,15 @@ function getContextualAddOn(e) {
   var message = GmailApp.getMessageById(messageId);
   var emailBody = message.getPlainBody();
   
-  emailBody = MD5(removeWhiteSpace(removeNouns(emailBody)));
-  
+  hashedEmailBody = MD5(removeWhiteSpace(removeNouns(emailBody)));
   
   //check if mass email -> helpers as before
   
   //give a string to builder to display yes / no
-  var numOtherUsersGotEmail = "10";
+  var numOtherUsersGotEmail = checkHashPresent(hashedEmailBody);
   var result = "yes";
   
-  var card = createMassEmailCard(emailBody,result);
+  var card = createMassEmailCard(numOtherUsersGotEmail,result);
 
   return card;
 }
