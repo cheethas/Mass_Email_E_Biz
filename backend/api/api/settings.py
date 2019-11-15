@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+import pymysql  # noqa: 402
+pymysql.install_as_MySQLdb()
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,9 +26,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '$1ay8l-fjd_b^a=@2182#f0pha+k&*xn48yg(c0w^$42_lhvo#'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = [localhost]
+ALLOWED_HOSTS = [
+    "massemaildetector.appspot.com",
+    "127.0.0.1/"
+]
 
 
 # Application definition
@@ -43,6 +49,7 @@ INSTALLED_APPS = [
     'hash.apps.HashConfig',
     
     'corsheaders',
+    #'django.contrib.admindocs',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -87,13 +94,80 @@ WSGI_APPLICATION = 'api.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
+
+'''
+# [START dbconfig]
+DATABASES = {
+    'default': {
+        # If you are using Cloud SQL for MySQL rather than PostgreSQL, set
+        # 'ENGINE': 'django.db.backends.mysql' instead of the following.
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'Hash',
+        'USER': 'cheethas',
+        'PASSWORD': 'OpenSourceBitch',
+        # For MySQL, set 'PORT': '3306' instead of the following. Any Cloud
+        # SQL Proxy instances running locally must also be set to tcp:3306.
+        'PORT': '3306',
+    }
+}
+# to Cloud SQL via the proxy.  To start the proxy via command line: 
+    #    $ cloud_sql_proxy -instances=[INSTANCE_CONNECTION_NAME]=tcp:3306 
+# In the flexible environment, you connect to CloudSQL using a unix socket.
+# Locally, you can use the CloudSQL proxy to proxy a localhost connection
+# to the instance
+DATABASES['default']['HOST'] = '/cloudsql/massemaildetector:europe-west1:massemaildetector-mysql'
+if os.getenv('GAE_INSTANCE'):
+    pass
+else:
+    DATABASES['default']['HOST'] = '35.195.244.113'
+# [END dbconfig]
+'''
+
+# [START db_setup]
+if os.getenv('GAE_APPLICATION', None):
+    # Running on production App Engine, so connect to Google Cloud SQL using
+    # the unix socket at /cloudsql/<your-cloudsql-connection string>
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'HOST': '/cloudsql/massemaildetector:europe-west1:massemaildetector-mysql',
+            'USER': 'cheethas',
+            'PASSWORD': 'OpenSourceBitch',
+            'NAME': 'Hash',
+            'PORT': '3306'
+        }
+    }
+else:
+    # Running locally so connect to either a local MySQL instance or connect 
+    # to Cloud SQL via the proxy.  To start the proxy via command line: 
+    #    $ cloud_sql_proxy -instances=[INSTANCE_CONNECTION_NAME]=tcp:3306 
+    # See https://cloud.google.com/sql/docs/mysql-connect-proxy
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'HOST': '35.195.244.113',
+            'PORT': '3306',
+            'NAME': 'Hash',
+            'USER': 'cheethas',
+            'PASSWORD': 'OpenSourceBitch',
+        }
+    }
+# [END db_setup]
+
+#DATABASES = {
+#    'default' : {
+#        'ENGINE' : 'django.db.backends.mysql',
+#        'NAME' : 
+#    }
+#}
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
+'''
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -131,7 +205,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = 'https://storage.googleapis.com/massemailbucket/static/'
+#STATIC_URL = /static/
+
+# Google App Engine: set static root for local static files
+# https://cloud.google.com/appengine/docs/flexible/python/serving-static-files
+STATIC_ROOT = 'static'
 
 
 
