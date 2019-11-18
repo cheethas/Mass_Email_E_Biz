@@ -15,18 +15,22 @@ function getContextualAddOn(event) {
   
   var emailBody = message.getPlainBody();
   
-  Logger.log(emailBody);
-  
   var hashValue = MD5(removeWhiteSpace(removeNouns(emailBody)));
-  Logger.log(hashValue);
-  var apiReturnedCount = checkHashPresent(hashValue);
-  Logger.log(apiReturnedCount);
+  var responseObject = checkHashPresent(hashValue);
+  
+  /* response object has the form
+  {
+  hashVal : <the value of hashValue above>,
+  count : <the count returned from the API>,
+  method : <whether the hashvalue was "updated"|"created"> 
+  }
+  */
+  
+  
+  Logger.log(responseObject.count);
   
   //create a response object to be used in the page
-  var responseObject = {
-    hash : hashValue,
-    count : apiReturnedCount, 
-  }
+  
 
   
   var card = createDetectedCard(prefill, result, responseObject);

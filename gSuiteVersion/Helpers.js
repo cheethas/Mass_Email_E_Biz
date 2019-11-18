@@ -15,27 +15,28 @@ function removeWhiteSpace(textString){
 }
 
 
-//perform refactoring
-function newHandleHash(hashVal){
 
-}
+
+// DJANGO SERVER CONNECTIVITY
 
 //for if a hash is present
 function checkHashPresent(hashVal){
   //rememeber to change to passed in value
   var getURL = APIURL +"hashes/" + hashVal + "/";
-  Logger.log(getURL);
+  Logger.log("get url " + getURL);
   //perfom get req
   var options = {
-    "muteHttpExceptions" : false,
-    "method" : "get"
+    "muteHttpExceptions" : true,
+    "method" : "get",
+    "headers" : {}
   };
   try{
     var response = UrlFetchApp.fetch(getURL,options);
-    Logger.log("gets here");
+    Logger.log(response);
     var rCode = response.getResponseCode();
     
-    Logger.log(rCode);
+    Logger.log("code " + rCode);
+    
     if ((rCode == 200)){
         //interpret get req
         Logger.log(response.getResponseCode());
@@ -81,7 +82,13 @@ function updateHashCount(hashVal, currentCount){
       var parsedJson = JSON.parse(responseObj);
       var returnedCount = parseInt(parsedJson.count);
       Logger.log("returned put count : " + returnedCount);
-      return returnedCount;
+      
+      /*
+      Returns a return object that lists the hash returned
+      the count of it
+      if it was "updated", or "created"
+      */
+      return {hash : hashValue, count : returnedCount , actionPerformed : "updated"};
     } else {
      return false; 
     }
@@ -107,7 +114,7 @@ function createNewHash(hashVal){
       var responseObj = response.getContentText();
       var parsedJson = JSON.parse(responseObj);
       var returnedCount = parseInt(parsedJson.count);
-      return returnedCount;
+      return {hash : hashValue, count : returnedCount , actionPerformed : "created"};
     } else {
       return "Application error: unable to add email to database"; 
     }
@@ -118,30 +125,6 @@ function createNewHash(hashVal){
  
 }
 
-
-
-function performJustGetReq(hashString){
-
-  var xhr = new XMLHttpRequest();
-  var url = "http://127.0.0.1:8000/api/hashes/" + hashString + "/";
-  //open connection
-  xhr.open("GET", url, true);
-  xhr.send(null);
-
-  xhr.onreadystatechange = function(){
-    if (xhr.readyState == 4 && (xhr.status == 200)){
-      var response = xhr.responseText;
-      var responseJson = JSON.parse(response);
-
-      console.log("hashVal = " + responseJson.hashValue + " count = " + responseJson.count);
-    }
-  }
-  xhr.onerror = function() {
-    console.log("request failed " + xhr.status);
-  }
-
-
-}
 
 
 //MD5 function from stackoverflow
