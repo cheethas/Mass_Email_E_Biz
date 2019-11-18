@@ -21,7 +21,7 @@ function newHandleHash(hashVal){
 //for if a hash is present
 function checkHashPresent(hashVal){
   //rememeber to change to passed in value
-  var getURL = "http://127.0.0.1:8000/api/hashes/";
+  var getURL = "http://massemaildetector.appspot.com/api/hashes/" + hashVal + "/";
 
   //perfom get req
   var options = {
@@ -38,9 +38,10 @@ function checkHashPresent(hashVal){
     if ((rCode == 200) || (rCode ==204)){
         //interpret get req
         Logger.log(response.getResponseCode());
-        var responseJson = response.getContentText();
-        Logger.log(responseJson);
-        return true;
+        var responseObj = response.getContentText();
+        var parsedJson = JSON.parse(responseObj);
+        var returnedCount = parseInt(parsedJson.count|0);
+        return returnedCount;
     } else {
       return flase;
     }
@@ -63,7 +64,7 @@ function handleHash(hashString){
 
   //get number of hashes using hash from server
   var xhr = new XMLHttpRequest();
-  xhr.open("GET",hashUrl,true);
+  xhr.open("GET",hashUrl,false);
   xhr.send(null);
   //the hash already exists in the db
   xhr.onreadystatechange = function (){

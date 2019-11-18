@@ -8,36 +8,47 @@
  * @param {Object} event Event containing the message ID and other context.
  * @returns {Card[]}
  */
-function getContextualAddOn(e) {
+function getContextualAddOn(event) {
+  var message = getCurrentMessage(event);
+  var prefill = [getEmailBody(message)];
+  var result = checkEmail(message);
   
-  var accessToken = e.messageMetadata.accessToken;
-  GmailApp.setCurrentMessageAccessToken(accessToken);
-  
-  var messageId = e.messageMetadata.messageId;
-  var message = GmailApp.getMessageById(messageId);
   var emailBody = message.getPlainBody();
+  var hashValue = MD5(removeWhiteSpace(removeNouns(emailBody)));
   
-  hashedEmailBody = MD5(removeWhiteSpace(removeNouns(emailBody)));
+  var apiReturnedCount = checkHashPresent("hereisapossiblehash");
+  Logger.log(apiReturnedCount);
   
-  //check if mass email -> helpers as before
-  
-  //give a string to builder to display yes / no
-  var numOtherUsersGotEmail = checkHashPresent(hashedEmailBody);
-  var result = "yes";
-  
-  var card = createMassEmailCard(numOtherUsersGotEmail,result);
+  //create a response object to be used in the page
+  var responseObject = {
+    hash : hashValue,
+    count : apiReturnedCount, 
+  }
 
-  return card;
+  
+  var card = createDetectedCard(prefill, result, responseObject);
+
+  return [card.build()];
 }
 
-/**
- * Retrieves the current message given an action event object.
- * @param {Event} event Action event object
- * @return {Message}
- */
+
+// Take in the email
 function getCurrentMessage(event) {
   var accessToken = event.messageMetadata.accessToken;
   var messageId = event.messageMetadata.messageId;
   GmailApp.setCurrentMessageAccessToken(accessToken);
   return GmailApp.getMessageById(messageId);
+  
+}
+
+
+function getEmailBody(message){
+  var emailBody = message.getBody();
+  return emailBody;
+}
+
+//Simple check function - gets the email sender
+function checkEmail(message){
+  var sender = message.getFrom();
+  return sender;
 }
