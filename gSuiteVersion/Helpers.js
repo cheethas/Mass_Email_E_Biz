@@ -1,3 +1,5 @@
+var APIURL = "http://massemaildetector.appspot.com/api/";
+
 //import 'google-apps-script';
 //functions to deal with manipulation of email text
 function removeNouns(emailBody){
@@ -21,150 +23,101 @@ function newHandleHash(hashVal){
 //for if a hash is present
 function checkHashPresent(hashVal){
   //rememeber to change to passed in value
-  var getURL = "http://massemaildetector.appspot.com/api/hashes/" + hashVal + "/";
-
+  var getURL = APIURL +"hashes/" + hashVal + "/";
+  Logger.log(getURL);
   //perfom get req
   var options = {
     "muteHttpExceptions" : false,
-    "headers": {
-      'Request_Method' : 'GET',
-   },
+    "method" : "get"
   };
-  Logger.log(getURL);
   try{
-    var response = UrlFetchApp.fetch(getURL);//,options);
+    var response = UrlFetchApp.fetch(getURL,options);
+    Logger.log("gets here");
     var rCode = response.getResponseCode();
     
-    if ((rCode == 200) || (rCode ==204)){
+    Logger.log(rCode);
+    if ((rCode == 200)){
         //interpret get req
         Logger.log(response.getResponseCode());
         var responseObj = response.getContentText();
         var parsedJson = JSON.parse(responseObj);
-        var returnedCount = parseInt(parsedJson.count|0);
-        return returnedCount;
-    } else {
-      return flase;
+        var returnedCount = parseInt(parsedJson.count);
+      
+      Logger.log(returnedCount);
+        //if the hash already exists the current value should be updated
+        return updateHashCount(hashVal, returnedCount);
+    } else if (rCode == 404 || rCode == 204){ 
+      //if the hash does not exist a new one should be created
+      return createNewHash(hashVal);
     }
   } catch (e) {
     Logger.log("went to catch");
-    return false;
+    return e;
   }
 }
 
-
-
-
-//performs a get request to the response = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
-
-//server for the specific hash
-function handleHash(hashString){
+//if the hash is present, perform an update to what is in the database
+function updateHashCount(hashVal, currentCount){
+  //create a new count
+  var newCount = currentCount+ 1; 
+  var putURL = (APIURL + "hashes/" + hashVal + "/");
   
-  var found = false;
-  var hashUrl =  "http://127.0.0.1:8000/api/hashes/" + hashString + "/";
-
-  //get number of hashes using hash from server
-  var xhr = new XMLHttpRequest();
-  xhr.open("GET",hashUrl,false);
-  xhr.send(null);
-  //the hash already exists in the db
-  xhr.onreadystatechange = function (){
-    if (xhr.readyState == 4 && xhr.status == 200){
-      var response = xhr.responseText; //could send this +1 back to user
-      var returnJson = JSON.parse(response);
-
-      console.log("hash = " + returnJson.hashValue.toString() + " count = " + returnJson.count.toString());
-
-      //return the count as the return variable
-      response = returnJson.count.toString();
-
-      //make this so that a pop up shows up
-      // and so it updates the count
-      updateHash(returnJson);
-
-
-    } else if (xhr.readyState == 4 && xhr.status == 204){
-      //means the hash does not exist
-      //create a new hash so
-      createNewHash(hashString);
-
+  //prepare the JSON object to be sent
+  var sendObject = {
+    "hashValue" : hashVal,
+    "count" : newCount
+  };
+  
+  var options =  {
+    "muteHttpExceptions" : false,"payload" : JSON.stringify(sendObject), "method" : "put", "headers" : {'Content-Type': "application/json", 'Accept': "application/json"}};
+  
+  try{
+    var response = UrlFetchApp.fetch(putURL, options);
+    var rCode = response.getResponseCode();
+    Logger.log("put request response code" + rCode);
+    
+    if ((rCode = 200) || (rCode == 204)){
+      var responseObj = response.getContentText();
+      var parsedJson = JSON.parse(responseObj);
+      var returnedCount = parseInt(parsedJson.count);
+      Logger.log("returned put count : " + returnedCount);
+      return returnedCount;
+    } else {
+     return false; 
     }
+    
+  } catch(e){
+    return e;   
   }
-  xhr.onerror = function(){
-    console.log(xhr.status);
-    if (xhr.status == 204){
-      console.log(xhr.status);
-      found =  false;
-    }
-  }
-  return found;
-
-}
-//works i believe ^
-
-//send a post request to the server to add a new hash string
-function createNewHash(hashString){
-
-  console.log("passed in : " + hashString);
-
-  var xhr = new XMLHttpRequest();
-  var url = "http://127.0.0.1:8000/api/hashes/";
-  var newHashData = JSON.stringify({"hashValue" : hashString.toString()});
-
-  console.log(newHashData);
-
-  xhr.open("POST", url, true);
-  xhr.setRequestHeader("Content-type", "application/json");
-  xhr.send(newHashData);
-  //add to the database
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState == 4 && xhr.status == 201){
-
-      //perorm a gt req to check data is successfully in db
-      performJustGetReq(hashString.toString());
-
-      return true;
-    }
-  }
-  xhr.onerror = function(){console.log("client 2 had an error"); console.log(xhr.status); return false;}
-
-  return false;
-
+ 
 }
 
-//send a post request to the server to add a new hash string
-function updateHash(jsonObj){
-
-
-  var xhr = new XMLHttpRequest();
-  var url = "http://127.0.0.1:8000/api/hashes/" + jsonObj.hashValue + "/";
-
-  //increase the val by one
-  jsonObj.count = jsonObj.count + 1;
-  var updatedObj = JSON.stringify(jsonObj);
-
-  xhr.open("PUT", url, true);
-  xhr.setRequestHeader("Content-type", "application/json");
-  xhr.send(updatedObj);
-  //add to the database
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 204 )){
-      var response = xhr.responseText;
-      console.log("updated successfully");
-      var responseJson = JSON.parse(response);
-
-      console.log("hashVal = " + responseJson.hashValue + "count = " + responseJson.count);
-
-
-      //performJustGetReq(jsonObj.hashValue);
-
-      return true;
+//for when the hash does not exist
+function createNewHash(hashVal){
+  var postUrl = APIURL + "hashes/";
+  var sendObject = JSON.stringify({hashValue : hashVal.toString()});
+  var options =  {"muteHttpExceptions" : false,"payload" : sendObject, "method" : "post", "headers": {'Content-Type': "application/json", 'Accept': "application/json"}};
+  
+  //perform request
+  try{
+    var response = UrlFetchApp.fetch(postUrl, options);
+    var rCode = response.getResponseCode();
+    
+    if (rCode = 201){
+      var responseObj = response.getContentText();
+      var parsedJson = JSON.parse(responseObj);
+      var returnedCount = parseInt(parsedJson.count);
+      return returnedCount;
+    } else {
+      return "Application error: unable to add email to database"; 
     }
+    
+  } catch(e){
+    return false;   
   }
-  xhr.onerror = function(){console.log("client 2 had an error"); console.log(xhr.status); return false;}
-
-  return false;
-
+ 
 }
+
 
 
 function performJustGetReq(hashString){
@@ -259,13 +212,4 @@ MD5 = function(e) {
 };
 
 
-  /*
-function getReceivedDate(
-function import 'google-apps-script';
-//need to refactor xhr to use URLFETCH service
-//eg: var response = UrlFetchApp.fetch(url, {'muteHttpExceptions': true});
-me
 
-function getReceivedDate(message) {
-  return message.getPlainBody();
-}*/

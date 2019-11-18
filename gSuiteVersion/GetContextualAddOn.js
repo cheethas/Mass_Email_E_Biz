@@ -14,9 +14,12 @@ function getContextualAddOn(event) {
   var result = checkEmail(message);
   
   var emailBody = message.getPlainBody();
-  var hashValue = MD5(removeWhiteSpace(removeNouns(emailBody)));
   
-  var apiReturnedCount = checkHashPresent("hereisapossiblehash");
+  Logger.log(emailBody);
+  
+  var hashValue = MD5(removeWhiteSpace(removeNouns(emailBody)));
+  Logger.log(hashValue);
+  var apiReturnedCount = checkHashPresent(hashValue);
   Logger.log(apiReturnedCount);
   
   //create a response object to be used in the page
