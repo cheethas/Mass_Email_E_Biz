@@ -1,74 +1,11 @@
-//TO do
-//  Save data to chrome, don't just persist across background
-//
+var APIURL = "http://massemaildetector.appspot.com/api/";
 
-
-console.log("Background running");
-
-var background = {
-
-  emailSender: {},
-  emailBody:{},
-  dbUrl: "http://127.0.0.1:8000",
-
-  init: function(){
-    //listener for messages and route to functions
-    chrome.runtime.onMessage.addListener(function(request,sender,sendresponse){
-      if(request.fn in background){
-        background[request.fn](request,sender,sendresponse);
-      }
-      //console.log(sender);
-    });
-  },
-
-  setSender: function(request,sender,sendResponse){
-    console.log("sender:", request.sender);
-    this.emailSender = request.sender;
-  },
-
-  setBody: function(request,sender,sendResponse){
-    console.log("body:", request.sender);
-    this.emailBody = request.sender;
-
-
-  },
-
-  calcData: function(request,sender,sendResponse){
-    var peopleWhoGotEmail = 10;
-    console.log("people who got email: " + peopleWhoGotEmail);
-  },
-
-  mainF: function mainF(request, sender, sendResponse){
-    var joinEmailAndBody = (this.emailSender + this.emailBody).toString();
-    var joinedStringWihoutNouns = removeNouns(joinEmailAndBody);
-    var noNounsOrWhiteSpace = removeWhiteSpace(joinedStringWihoutNouns.toString());
-
-    //to display the altered string
-    console.log(joinEmailAndBody);
-    console.log(noNounsOrWhiteSpace);
-
-    var hash = MD5(noNounsOrWhiteSpace);
-    console.log(hash);
-
-    //console.log(doesHashExist("agdhsjadyeuuw7823"));
-
-    //check if the hash exists
-    numberOfHashes = 10;
-    handleHash(hash);
-
-    sendResponse({ result: numberOfHashes});
-    return true
-
-  }
-}
-
-background.init();
-
-
+//import 'google-apps-script';
 //functions to deal with manipulation of email text
 function removeNouns(emailBody){
   //declare regex
-  var emailBodyRemNouns = emailBody.replace(/(?<!^)(?<!\. )[A-Z][a-z]+/g, "");
+  var emailBodyRemNouns = emailBody.replace(/(?!\.) ([A-Z][a-z]+)/g, "");
+  //var emailBodyRemNouns = emailBody.replace(/(?<!^)(?<!\. )[A-Z][a-z]+/g, "");
   //return the string without the nouns
   return emailBodyRemNouns;
 }
@@ -77,138 +14,117 @@ function removeWhiteSpace(textString){
   return textString.replace(/ /g, "");
 }
 
-//performs a get request to the server for the specific hash
-function handleHash(hashString){
-  var found = false;
-  var hashUrl =  "http://127.0.0.1:8000/api/hashes/" + hashString + "/";
-
-  //get number of hashes using hash from server
-  var xhr = new XMLHttpRequest();
-  xhr.open("GET",hashUrl,true);
-  xhr.send(null);
-  //the hash already exists in the db
-  xhr.onreadystatechange = function (){
-    if (xhr.readyState == 4 && xhr.status == 200){
-      var response = xhr.responseText; //could send this +1 back to user
-      var returnJson = JSON.parse(response);
-
-      console.log("hash = " + returnJson.hashValue.toString() + " count = " + returnJson.count.toString());
-
-      //return the count as the return variable
-      response = returnJson.count.toString();
-
-      //make this so that a pop up shows up
-      // and so it updates the count
-      updateHash(returnJson);
 
 
-    } else if (xhr.readyState == 4 && xhr.status == 204){
-      //means the hash does not exist
-      //create a new hash so
-      createNewHash(hashString);
 
+// DJANGO SERVER CONNECTIVITY
+
+//for if a hash is present
+function checkHashPresent(hashVal){
+  //rememeber to change to passed in value
+  var getURL = APIURL +"hashes/" + hashVal + "/";
+  Logger.log("get url " + getURL);
+  //perfom get req
+  var options = {
+    "muteHttpExceptions" : true,
+    "method" : "get",
+    "headers" : {}
+  };
+  try{
+    var response = UrlFetchApp.fetch(getURL,options);
+    Logger.log(response);
+    var rCode = response.getResponseCode();
+    
+    Logger.log("code " + rCode);
+    
+    if ((rCode == 200)){
+        //interpret get req
+        Logger.log(response.getResponseCode());
+        var responseObj = response.getContentText();
+        var parsedJson = JSON.parse(responseObj);
+        var returnedCount = parseInt(parsedJson.count);
+      
+      Logger.log(returnedCount);
+        //if the hash already exists the current value should be updated
+        return updateHashCount(hashVal, returnedCount);
+    } else if (rCode == 404 || rCode == 204){ 
+      //if the hash does not exist a new one should be created
+      return createNewHash(hashVal);
     }
+  } catch (e) {
+    Logger.log("went to catch");
+    return e;
   }
-  xhr.onerror = function(){
-    console.log(xhr.status);
-    if (xhr.status == 204){
-      console.log(xhr.status);
-      found =  false;
-    }
-  }
-  return found;
-
-}
-//works i believe ^
-
-//send a post request to the server to add a new hash string
-function createNewHash(hashString){
-
-  console.log("passed in : " + hashString);
-
-  var xhr = new XMLHttpRequest();
-  var url = "http://127.0.0.1:8000/api/hashes/";
-  var newHashData = JSON.stringify({"hashValue" : hashString.toString()});
-
-  console.log(newHashData);
-
-  xhr.open("POST", url, true);
-  xhr.setRequestHeader("Content-type", "application/json");
-  xhr.send(newHashData);
-  //add to the database
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState == 4 && xhr.status == 201){
-
-      //perorm a gt req to check data is successfully in db
-      performJustGetReq(hashString.toString());
-
-      return true;
-    }
-  }
-  xhr.onerror = function(){console.log("client 2 had an error"); console.log(xhr.status); return false;}
-
-  return false;
-
 }
 
-//send a post request to the server to add a new hash string
-function updateHash(jsonObj){
-
-
-  var xhr = new XMLHttpRequest();
-  var url = "http://127.0.0.1:8000/api/hashes/" + jsonObj.hashValue + "/";
-
-  //increase the val by one
-  jsonObj.count = jsonObj.count + 1;
-  var updatedObj = JSON.stringify(jsonObj);
-
-  xhr.open("PUT", url, true);
-  xhr.setRequestHeader("Content-type", "application/json");
-  xhr.send(updatedObj);
-  //add to the database
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 204 )){
-      var response = xhr.responseText;
-      console.log("updated successfully");
-      var responseJson = JSON.parse(response);
-
-      console.log("hashVal = " + responseJson.hashValue + "count = " + responseJson.count);
-
-
-      //performJustGetReq(jsonObj.hashValue);
-
-      return true;
+//if the hash is present, perform an update to what is in the database
+function updateHashCount(hashVal, currentCount){
+  //create a new count
+  var newCount = currentCount+ 1; 
+  var putURL = (APIURL + "hashes/" + hashVal + "/");
+  
+  //prepare the JSON object to be sent
+  var sendObject = {
+    "hashValue" : hashVal,
+    "count" : newCount
+  };
+  
+  var options =  {
+    "muteHttpExceptions" : false,"payload" : JSON.stringify(sendObject), "method" : "put", "headers" : {'Content-Type': "application/json", 'Accept': "application/json"}};
+  
+  try{
+    var response = UrlFetchApp.fetch(putURL, options);
+    var rCode = response.getResponseCode();
+    Logger.log("put request response code" + rCode);
+    
+    if ((rCode = 200) || (rCode == 204)){
+      var responseObj = response.getContentText();
+      var parsedJson = JSON.parse(responseObj);
+      var returnedCount = parseInt(parsedJson.count);
+      Logger.log("returned put count : " + returnedCount);
+      
+      /*
+      Returns a return object that lists the hash returned
+      the count of it
+      if it was "updated", or "created"
+      */
+      return {hash : hashValue, count : returnedCount , actionPerformed : "updated"};
+    } else {
+     return false; 
     }
+    
+  } catch(e){
+    return e;   
   }
-  xhr.onerror = function(){console.log("client 2 had an error"); console.log(xhr.status); return false;}
-
-  return false;
-
+ 
 }
 
-
-function performJustGetReq(hashString){
-
-  var xhr = new XMLHttpRequest();
-  var url = "http://127.0.0.1:8000/api/hashes/" + hashString + "/";
-  //open connection
-  xhr.open("GET", url, true);
-  xhr.send(null);
-
-  xhr.onreadystatechange = function(){
-    if (xhr.readyState == 4 && (xhr.status == 200)){
-      var response = xhr.responseText;
-      var responseJson = JSON.parse(response);
-
-      console.log("hashVal = " + responseJson.hashValue + " count = " + responseJson.count);
+//for when the hash does not exist
+function createNewHash(hashVal){
+  var postUrl = APIURL + "hashes/";
+  var sendObject = JSON.stringify({hashValue : hashVal.toString()});
+  var options =  {"muteHttpExceptions" : false,"payload" : sendObject, "method" : "post", "headers": {'Content-Type': "application/json", 'Accept': "application/json"}};
+  
+  //perform request
+  try{
+    var response = UrlFetchApp.fetch(postUrl, options);
+    var rCode = response.getResponseCode();
+    
+    if (rCode = 201){
+      var responseObj = response.getContentText();
+      var parsedJson = JSON.parse(responseObj);
+      var returnedCount = parseInt(parsedJson.count);
+      return {hash : hashValue, count : returnedCount , actionPerformed : "created"};
+    } else {
+      return "Application error: unable to add email to database"; 
     }
+    
+  } catch(e){
+    return false;   
   }
-  xhr.onerror = function() {
-    console.log("request failed " + xhr.status);
-  }
-
-
+ 
 }
+
 
 
 //MD5 function from stackoverflow
@@ -277,3 +193,6 @@ MD5 = function(e) {
   for (e = 0; e < f.length; e += 16) q = a, r = b, s = c, t = d, a = k(a, b, c, d, f[e + 0], 7, 3614090360), d = k(d, a, b, c, f[e + 1], 12, 3905402710), c = k(c, d, a, b, f[e + 2], 17, 606105819), b = k(b, c, d, a, f[e + 3], 22, 3250441966), a = k(a, b, c, d, f[e + 4], 7, 4118548399), d = k(d, a, b, c, f[e + 5], 12, 1200080426), c = k(c, d, a, b, f[e + 6], 17, 2821735955), b = k(b, c, d, a, f[e + 7], 22, 4249261313), a = k(a, b, c, d, f[e + 8], 7, 1770035416), d = k(d, a, b, c, f[e + 9], 12, 2336552879), c = k(c, d, a, b, f[e + 10], 17, 4294925233), b = k(b, c, d, a, f[e + 11], 22, 2304563134), a = k(a, b, c, d, f[e + 12], 7, 1804603682), d = k(d, a, b, c, f[e + 13], 12, 4254626195), c = k(c, d, a, b, f[e + 14], 17, 2792965006), b = k(b, c, d, a, f[e + 15], 22, 1236535329), a = l(a, b, c, d, f[e + 1], 5, 4129170786), d = l(d, a, b, c, f[e + 6], 9, 3225465664), c = l(c, d, a, b, f[e + 11], 14, 643717713), b = l(b, c, d, a, f[e + 0], 20, 3921069994), a = l(a, b, c, d, f[e + 5], 5, 3593408605), d = l(d, a, b, c, f[e + 10], 9, 38016083), c = l(c, d, a, b, f[e + 15], 14, 3634488961), b = l(b, c, d, a, f[e + 4], 20, 3889429448), a = l(a, b, c, d, f[e + 9], 5, 568446438), d = l(d, a, b, c, f[e + 14], 9, 3275163606), c = l(c, d, a, b, f[e + 3], 14, 4107603335), b = l(b, c, d, a, f[e + 8], 20, 1163531501), a = l(a, b, c, d, f[e + 13], 5, 2850285829), d = l(d, a, b, c, f[e + 2], 9, 4243563512), c = l(c, d, a, b, f[e + 7], 14, 1735328473), b = l(b, c, d, a, f[e + 12], 20, 2368359562), a = m(a, b, c, d, f[e + 5], 4, 4294588738), d = m(d, a, b, c, f[e + 8], 11, 2272392833), c = m(c, d, a, b, f[e + 11], 16, 1839030562), b = m(b, c, d, a, f[e + 14], 23, 4259657740), a = m(a, b, c, d, f[e + 1], 4, 2763975236), d = m(d, a, b, c, f[e + 4], 11, 1272893353), c = m(c, d, a, b, f[e + 7], 16, 4139469664), b = m(b, c, d, a, f[e + 10], 23, 3200236656), a = m(a, b, c, d, f[e + 13], 4, 681279174), d = m(d, a, b, c, f[e + 0], 11, 3936430074), c = m(c, d, a, b, f[e + 3], 16, 3572445317), b = m(b, c, d, a, f[e + 6], 23, 76029189), a = m(a, b, c, d, f[e + 9], 4, 3654602809), d = m(d, a, b, c, f[e + 12], 11, 3873151461), c = m(c, d, a, b, f[e + 15], 16, 530742520), b = m(b, c, d, a, f[e + 2], 23, 3299628645), a = n(a, b, c, d, f[e + 0], 6, 4096336452), d = n(d, a, b, c, f[e + 7], 10, 1126891415), c = n(c, d, a, b, f[e + 14], 15, 2878612391), b = n(b, c, d, a, f[e + 5], 21, 4237533241), a = n(a, b, c, d, f[e + 12], 6, 1700485571), d = n(d, a, b, c, f[e + 3], 10, 2399980690), c = n(c, d, a, b, f[e + 10], 15, 4293915773), b = n(b, c, d, a, f[e + 1], 21, 2240044497), a = n(a, b, c, d, f[e + 8], 6, 1873313359), d = n(d, a, b, c, f[e + 15], 10, 4264355552), c = n(c, d, a, b, f[e + 6], 15, 2734768916), b = n(b, c, d, a, f[e + 13], 21, 1309151649), a = n(a, b, c, d, f[e + 4], 6, 4149444226), d = n(d, a, b, c, f[e + 11], 10, 3174756917), c = n(c, d, a, b, f[e + 2], 15, 718787259), b = n(b, c, d, a, f[e + 9], 21, 3951481745), a = h(a, q), b = h(b, r), c = h(c, s), d = h(d, t);
   return (p(a) + p(b) + p(c) + p(d)).toLowerCase()
 };
+
+
+
