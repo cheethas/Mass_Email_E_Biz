@@ -16,7 +16,7 @@ function getContextualAddOn(event) {
   var emailBody = message.getPlainBody();
   
   var hashValue = MD5(removeWhiteSpace(removeNouns(emailBody)));
-  var responseObject = checkHashPresent(hashValue);
+  var responseCount = checkHashPresent(hashValue);
   
   /* response object has the form
   {
@@ -25,11 +25,12 @@ function getContextualAddOn(event) {
   method : <whether the hashvalue was "updated"|"created"> 
   }
   */
-  
-  
-  Logger.log(responseObject.count);
-  
-  //create a response object to be used in the page
+ 
+  var responseObject = {
+    count: responseCount,
+    hashVal: hashValue,
+    method: (responseCount == 1) ? "created" : "updated",
+  }
   
 
   

@@ -1,200 +1,71 @@
-//import 'google-apps-script';
-//TEMPLATE FILE NEEDS TO BE ADAPTED FOR MASS EMAIL, STARTED BELOW EXPENSE EXAMPLE
-
-
 // UI
 function createDetectedCard(prefill, result, responseObject){
   
+  //constants
+  var MASS_EMAIL_IF_OVER_THIS_NUMBER = 4;
+  var NOT_MASS_EMAIL_IF_UNDER_THIS_NUMBER = 2;
+  
+  var card = CardService.newCardBuilder();
+  card.setHeader(CardService.newCardHeader()); //.setTitle('Result'));
+  
   try{
-    var card = CardService.newCardBuilder();
-    card.setHeader(CardService.newCardHeader()); //.setTitle('Result'));
+   
+    //variables from fn input
+    var countOfResponse = responseObject.count;
+    var emailSenderString= result;
+
+    //Strings
+    var massEmailLikelihoodString = generateLikelihoodString(countOfResponse,MASS_EMAIL_IF_OVER_THIS_NUMBER,NOT_MASS_EMAIL_IF_UNDER_THIS_NUMBER);
+    var otherUsersSectionString = 'This email has been received by ' + countOfResponse + ' other users on our system.'; 
+    var errorString = 'Mass Email Detector encountered an error.';
     
-    var resultTest = result;
-    var stringTest = 'This email has been received by ' + responseObject.count + ' others on our system.';  
-    var errorString = 'Mass email detector encountered an error.';
-    var massEmailString = 'High likelihood of mass email when more than 5 people have received it.';
-    
-    var resultSection = CardService.newCardSection();
-    resultSection.addWidget(CardService.newKeyValue()
-                            .setTopLabel('Detection Result')
-                            .setIconUrl("https://cdn3.iconfinder.com/data/icons/green-business-1/750/5-512.png")
-                            .setContent('<b>' + stringTest + '</b>')
-                            .setMultiline(true));
-    
-    var errorSection = CardService.newCardSection();
-    errorSection.addWidget(CardService.newKeyValue()
-                           .setTopLabel('Detection Error')
-                           .setIconUrl("https://www.iconsdb.com/icons/preview/red/error-4-xxl.png")
-                           .setContent('<b>' + errorString + '</b>')
-                           .setMultiline(true));
-    
-    
-    var massEmailInfoSection = CardService.newCardSection();
-    massEmailInfoSection.addWidget(CardService.newKeyValue()
-                                   .setTopLabel('Mass Email Likelhood')
-                                   .setIconUrl("https://icon-library.net/images/fyi-icon/fyi-icon-7.jpg")
-                                   .setContent('<b>' + massEmailString + '</b>')
-                                   .setMultiline(true));
-    
-    
-    var senderSection = CardService.newCardSection();
-    senderSection.addWidget(CardService.newKeyValue()
-                            .setTopLabel('Email Sender')
-                            .setIconUrl("http://ichef.bbci.co.uk/news/976/cpsprodpb/12787/production/_95455657_3312a880-230e-474c-b1d9-bb7c94f8b00e.jpg")
-                            .setContent('<b>' + result + '</b>')
-                            .setMultiline(true));
-    
-    var emailBodySection = CardService.newCardSection();
-    emailBodySection.addWidget(CardService.newKeyValue()
-                               .setTopLabel('Email Body')
-                               .setIconUrl("https://www.clipartwiki.com/clipimg/detail/203-2038008_email-icons-website-mail-icon-png-pink.png")
-                               .setContent('<b>' + prefill + '</b>')
-                               .setMultiline(true));
-    
-    
+    //Card sections
+    var otherUsersSection = buildCardSection("Detection Result","https://cdn3.iconfinder.com/data/icons/green-business-1/750/5-512.png",otherUsersSectionString);
+    var massEmailInfoSection = buildCardSection("Mass Email Likelihood","https://icon-library.net/images/fyi-icon/fyi-icon-7.jpg",massEmailLikelihoodString);
+    var senderSection = buildCardSection("Email Sender","http://ichef.bbci.co.uk/news/976/cpsprodpb/12787/production/_95455657_3312a880-230e-474c-b1d9-bb7c94f8b00e.jpg",emailSenderString);
+ 
     card.addSection(senderSection);
-    card.addSection(resultSection);
+    card.addSection(otherUsersSection);
     card.addSection(massEmailInfoSection);
-    //card.addSection(emailBodySection);
+  
   } catch (e){ 
+   var errorSection = buildCardSection("Detection Error","https://www.iconsdb.com/icons/preview/red/error-4-xxl.png",e);
    card.addSection(errorSection);
   } finally {
     return card;
   }
+}
+
+//Functiont takes in a top label,icon url and content and builds a cars section
+function buildCardSection(topLabel,iconUrl,content){
+  var newSection =  CardService.newCardSection();
+  newSection.addWidget(CardService.newKeyValue()
+                       .setTopLabel(topLabel)
+                       .setIconUrl(iconUrl)
+                       .setContent('<b>' + content + '</b>')
+                       .setMultiline(true))
   
+  return newSection;
 }
 
-
-/*
-/*
-//The parent object for the card being made
-function createMassEmailCard(numOtherUsersGotEmail,result) {
-  var card = CardService.newCardBuilder();
-  card.setHeader(CardService.newCardHeader().setTitle('Mass Email Detector!'));
-  card.addSection(createMessageSection(numOtherUsersGotEmail, result));
-  return card;
-}
-*/
-/*
-function createMassEmailCard(numOtherUsersGotEmail, result){
-  return CardService
-  .newCardBuilder()
-  .setHeader(
-      CardService.newCardHeader()
-          .setTitle('Mass Email Detector!')
-          .setSubtitle('Find out how many people have recieved' +
-                       'this email:'))
-  .addSection(
-       CardService.newCardSection()
-           .setHeader('This email '+ (result ? 'is' : 'is not') + ' a mass email!')  // optional
-           .addWidget(CardService.newTextParagraph().setText(
-                numOtherUsersGotEmail
-               )
-  ))
-  .build();
-}
-
-
-
-var FIELDNAMES = ['Date', 'Amount', 'Description', 'Spreadsheet URL'];
-
-/**
- * Creates the main card users see with form inputs to log expense.
- * Form can be prefilled with values.
- *
- * @param {String[]} opt_prefills Default values for each input field.
- * @param {String} opt_status Optional status displayed at top of card.
- * @returns {Card}
- */
-/*
-function createExpensesCard(opt_prefills, opt_status) {
-  var card = CardService.newCardBuilder();
-  card.setHeader(CardService.newCardHeader().setTitle('Mass Email Detector!'));
+//Function takes in a number, and two cut off points and returns a string that is the likelihood of the email being a mass email
+function generateLikelihoodString(number,highcut,lowcut){
+  var massEmailStringHighLikelihood = 'There is a high likelihood this is a mass email as at least '+ number +' other people have received it.';
+  var massEmailStringLowLikelihood = 'There is a moderate chance this is a mass email as at least '+ number  +' other people have received it.';
+  var massEmailStringNoLikelihood = 'There is an extremely low likelihood this is a mass email as only ' + number + ' other person has recieved it';
   
-  if (opt_status) {
-    if (opt_status.indexOf('Error: ') == 0) {
-      opt_status = '<font color=\'#FF0000\'>' + opt_status + '</font>';
-    } else {
-      opt_status = '<font color=\'#228B22\'>' + opt_status + '</font>';
+  if(number < lowcut){
+    return massEmailStringNoLikelihood;
+  }
+  else if(number >= lowcut && number <= highcut){
+      return massEmailStringLowLikelihood ;
     }
-    var statusSection = CardService.newCardSection();
-    statusSection.addWidget(CardService.newTextParagraph()
-      .setText('<b>' + opt_status + '</b>'));
-    card.addSection(statusSection);
-  }
-  
-  var formSection = createFormSection(CardService.newCardSection(),
-                                      FIELDNAMES, opt_prefills);
-  card.addSection(formSection);
-  
-  return card;
-}
-
-
-/**
- * Creates form section to be displayed on card.
- *
- * @param {CardSection} section The card section to which form items are added.
- * @param {String[]} inputNames Names of titles for each input field.
- * @param {String[]} opt_prefills Default values for each input field.
- * @returns {CardSection}
- */
-/*
-function createFormSection(section, inputNames, opt_prefills) {
-  for (var i = 0; i < inputNames.length; i++) {
-    var widget = CardService.newTextInput()
-      .setFieldName(inputNames[i])
-      .setTitle(inputNames[i]);
-    if (opt_prefills && opt_prefills[i]) {
-      widget.setValue(opt_prefills[i]);
+  else if(number > highcut){
+      return massEmailStringHighLikelihood;
     }
-    section.addWidget(widget);
-  }
-  return section;
-}
-/**
- * Logs form inputs into a spreadsheet given by URL from form.
- * Then displays edit card.
- *
- * @param {Event} e An event object containing form inputs and parameters.
- * @returns {Card}
- */
-/*
-
-function submitForm(e) {
-  var res = e['formInput'];
-  try {
-    FIELDNAMES.forEach(function(fieldName) {
-      if (! res[fieldName]) {
-        throw 'incomplete form';
-      }
-    });
-    var sheet = SpreadsheetApp
-      .openByUrl((res['Spreadsheet URL']))
-      .getActiveSheet();
-    sheet.appendRow(objToArray(res, FIELDNAMES.slice(0, FIELDNAMES.length - 1)));
-    return createExpensesCard(null, 'Logged expense successfully!').build();
-  }
-  catch (err) {
-    if (err == 'Exception: Invalid argument: url') {
-      err = 'Invalid URL';
-      res['Spreadsheet URL'] = null;
-    }
-    return createExpensesCard(objToArray(res, FIELDNAMES), 'Error: ' + err).build();
+  else{
+    //error -> shouldnt be here
+    return "error in generateLikeliehoodString";
   }
 }
 
-/*
- * Returns an array corresponding to the given object and desired ordering of keys.
- * Adding test comment
- * @param {Object} obj Object whose values will be returned as an array.
- * @param {String[]} keys An array of key names in the desired order.
- * @returns {Object[]}
- */
-/*
-function objToArray(obj, keys) {
-  return keys.map(function(key) {
-    return obj[key];
-  });
-}
-*/

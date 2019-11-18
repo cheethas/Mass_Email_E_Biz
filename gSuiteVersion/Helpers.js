@@ -83,12 +83,8 @@ function updateHashCount(hashVal, currentCount){
       var returnedCount = parseInt(parsedJson.count);
       Logger.log("returned put count : " + returnedCount);
       
-      /*
-      Returns a return object that lists the hash returned
-      the count of it
-      if it was "updated", or "created"
-      */
-      return {hash : hashValue, count : returnedCount , actionPerformed : "updated"};
+ 
+      return returnedCount; 
     } else {
      return false; 
     }
@@ -114,7 +110,7 @@ function createNewHash(hashVal){
       var responseObj = response.getContentText();
       var parsedJson = JSON.parse(responseObj);
       var returnedCount = parseInt(parsedJson.count);
-      return {hash : hashValue, count : returnedCount , actionPerformed : "created"};
+      return returnedCount;
     } else {
       return "Application error: unable to add email to database"; 
     }
