@@ -30,7 +30,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     "massemaildetector.appspot.com",
-    "127.0.0.1/"
+    "127.0.0.1"
 ]
 
 
@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'hash.apps.HashConfig',
     
     'corsheaders',
-    #'django.contrib.admindocs',
+    
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
