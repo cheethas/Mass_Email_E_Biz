@@ -4,4 +4,3 @@ from django.db import models
 class Hashes(models.Model):
     hashValue = models.CharField(primary_key = True, max_length=100, null=False)
     count = models.IntegerField(null=False, default=1)
-

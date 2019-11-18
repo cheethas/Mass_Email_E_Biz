@@ -14,7 +14,6 @@ import os
 import pymysql  # noqa: 402
 pymysql.install_as_MySQLdb()
 
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -43,23 +42,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     'rest_framework',
-    
     'hash.apps.HashConfig',
-    
+     
     'corsheaders',
-    
 ]
 
-CORS_ORIGIN_ALLOW_ALL = True
-
 MIDDLEWARE = [
-    #cors middleware
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
 
-    #standard middleware
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -67,7 +59,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
 ]
 
 ROOT_URLCONF = 'api.urls'
@@ -93,8 +84,13 @@ WSGI_APPLICATION = 'api.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-
-
+'''
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
 '''
 # [START dbconfig]
 DATABASES = {
@@ -121,53 +117,7 @@ if os.getenv('GAE_INSTANCE'):
 else:
     DATABASES['default']['HOST'] = '35.195.244.113'
 # [END dbconfig]
-'''
 
-# [START db_setup]
-if os.getenv('GAE_APPLICATION', None):
-    # Running on production App Engine, so connect to Google Cloud SQL using
-    # the unix socket at /cloudsql/<your-cloudsql-connection string>
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'HOST': '/cloudsql/massemaildetector:europe-west1:massemaildetector-mysql',
-            'USER': 'cheethas',
-            'PASSWORD': 'OpenSourceBitch',
-            'NAME': 'Hash',
-            'PORT': '3306'
-        }
-    }
-else:
-    # Running locally so connect to either a local MySQL instance or connect 
-    # to Cloud SQL via the proxy.  To start the proxy via command line: 
-    #    $ cloud_sql_proxy -instances=[INSTANCE_CONNECTION_NAME]=tcp:3306 
-    # See https://cloud.google.com/sql/docs/mysql-connect-proxy
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'HOST': '35.195.244.113',
-            'PORT': '3306',
-            'NAME': 'Hash',
-            'USER': 'cheethas',
-            'PASSWORD': 'OpenSourceBitch',
-        }
-    }
-# [END db_setup]
-
-#DATABASES = {
-#    'default' : {
-#        'ENGINE' : 'django.db.backends.mysql',
-#        'NAME' : 
-#    }
-#}
-'''
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-'''
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -205,12 +155,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
-STATIC_URL = 'https://storage.googleapis.com/massemailbucket/static/'
-#STATIC_URL = /static/
+STATIC_URL = '/static/'
 
 # Google App Engine: set static root for local static files
 # https://cloud.google.com/appengine/docs/flexible/python/serving-static-files
 STATIC_ROOT = 'static'
-
-
 
