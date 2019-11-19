@@ -14,6 +14,10 @@ function removeWhiteSpace(textString){
   return textString.replace(/ /g, "");
 }
 
+function removeNewLines(textString){
+  return textString.replace(/\r?\n|\r/g, "");
+}
+
 
 
 

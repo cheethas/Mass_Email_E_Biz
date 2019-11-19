@@ -14,8 +14,8 @@ function getContextualAddOn(event) {
   var result = checkEmail(message);
   
   var emailBody = message.getPlainBody();
-  
-  var hashValue = MD5(removeWhiteSpace(removeNouns(emailBody)));
+ 
+  var hashValue = MD5(removeNewLines(removeWhiteSpace(removeNouns(emailBody))));
   var responseCount = checkHashPresent(hashValue);
   
   /* response object has the form
@@ -31,8 +31,6 @@ function getContextualAddOn(event) {
     hashVal: hashValue,
     method: (responseCount == 1) ? "created" : "updated",
   }
-  
-
   
   var card = createDetectedCard(prefill, result, responseObject);
 
