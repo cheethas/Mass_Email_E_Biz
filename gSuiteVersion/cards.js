@@ -6,7 +6,7 @@ function createDetectedCard(prefill, result, responseObject){
   var NOT_MASS_EMAIL_IF_UNDER_THIS_NUMBER = 2;
   
   var card = CardService.newCardBuilder();
-  card.setHeader(CardService.newCardHeader()); //.setTitle('Result'));
+  card.setHeader(CardService.newCardHeader()); 
   
   try{
    
@@ -50,9 +50,9 @@ function buildCardSection(topLabel,iconUrl,content){
 
 //Function takes in a number, and two cut off points and returns a string that is the likelihood of the email being a mass email
 function generateLikelihoodString(number,highcut,lowcut){
-  var massEmailStringHighLikelihood = 'There is a high likelihood this is a mass email as at least '+ number +' other people have received it.';
-  var massEmailStringLowLikelihood = 'There is a moderate chance this is a mass email as at least '+ number  +' other people have received it.';
-  var massEmailStringNoLikelihood = 'There is an extremely low likelihood this is a mass email as only ' + number + ' other person has recieved it';
+  var massEmailStringHighLikelihood = 'High';
+  var massEmailStringLowLikelihood = 'Medium';
+  var massEmailStringNoLikelihood = 'Low';
   
   if(number < lowcut){
     return massEmailStringNoLikelihood;
