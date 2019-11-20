@@ -12,7 +12,7 @@ The application is currently in development so can only be tried out through a g
 How does it work?
 This project is split up into two sections
  - back end
- - g suite front end
+ - g suite front end</br>
 To get started with developing this project clone this repository and follow the steps below to edit the files included in this repository
 
 ## Installing Backend for Development
