@@ -1,4 +1,10 @@
 // UI
+/*
+
+NOTE: UI designed  by Evan Mcroary
+
+
+*/
 function createDetectedCard(prefill, result, responseObject){
   
   //constants
