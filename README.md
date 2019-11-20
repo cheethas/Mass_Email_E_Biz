@@ -3,7 +3,13 @@ Repository for the E-Business module, tasked with building a Mass Email detector
 
 How to run: 
   - front end email client will be released shortly, with full instructions available on release
- 
+
+## Installing Alpha
+The application is currently in development so can only be tested through a gmail  developer addon, to perform installation for testing follow these steps:
+1. Open the Gmail add-on settings tab.
+2. In the Add-ons tab, make sure that you have selected the Enable developer add-ons for my account checkbox.
+3. Paste your add-on's deployment ID into the Developer add-on textbox and click Install.
+  - Current manifest ID - <include>
 
 ## Notes for further development
 How does it work?
