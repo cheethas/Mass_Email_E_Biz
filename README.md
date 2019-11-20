@@ -6,10 +6,10 @@ How to run:
 
 ## Installing Alpha
 The application is currently in development so can only be tested through a gmail  developer addon, to perform installation for testing follow these steps:
-1. Open the Gmail add-on settings tab.
+1. Open the Gmail add-on settings tab. --> https://mail.google.com/mail/u/0/#settings/addons
 2. In the Add-ons tab, make sure that you have selected the Enable developer add-ons for my account checkbox.
 3. Paste your add-on's deployment ID into the Developer add-on textbox and click Install.
-  - Current manifest ID - <include>
+  - Current app ID - AKfycbxueVIsTgZRR094YASCMWH9L49P_-8sbqAixvo387Q
 
 ## Notes for further development
 How does it work?
