@@ -92,15 +92,17 @@ DATABASES = {
     }
 }
 '''
+
+#database will only be active until the end of 2019, after that own database must be used as original host will be taken offline
 # [START dbconfig]
 DATABASES = {
     'default': {
         # If you are using Cloud SQL for MySQL rather than PostgreSQL, set
         # 'ENGINE': 'django.db.backends.mysql' instead of the following.
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'Hash',
-        'USER': 'cheethas',
-        'PASSWORD': 'OpenSourceBitch',
+        'NAME': 'Hash', 
+        'USER': 'root', #these are placeholder usernames
+        'PASSWORD': '',
         # For MySQL, set 'PORT': '3306' instead of the following. Any Cloud
         # SQL Proxy instances running locally must also be set to tcp:3306.
         'PORT': '3306',
