@@ -1,11 +1,8 @@
 # Mass_Email_E_Biz
 Repository for the E-Business module, tasked with building a Mass Email detector. This application exists as a gmail plugin that interfaces with a backend django enviornment. This readme.md will get you started on how to install and run the application.
 
-How to run: 
-  - front end email client will be released shortly, with full instructions available on release
-
-## Installing Alpha
-The application is currently in development so can only be tested through a gmail  developer addon, to perform installation for testing follow these steps:
+## How to Install
+The application is currently in development so can only be tried out through a gmail developer addon, to perform installation follow these steps:
 1. Open the Gmail add-on settings tab. --> https://mail.google.com/mail/u/0/#settings/addons
 2. In the Add-ons tab, make sure that you have selected the Enable developer add-ons for my account checkbox.
 3. Paste your add-on's deployment ID into the Developer add-on textbox and click Install.
